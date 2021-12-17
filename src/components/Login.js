@@ -3,14 +3,21 @@ import React, { useState } from "react";
 import "../styles/account.css";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import UserReviews from "./UserReviews";
-import WatchList from './WatchList';
+import WatchList from "./WatchList";
+import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
+import "../login.css"
+import { Button } from "@material-ui/core";
+
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  let navigate = useNavigate();
+
   const login = (event) => {
     event.preventDefault();
-    Axios.post("http://rmcmillan.co.uk/login", {
+    Axios.post("https://rmcmillan.co.uk/api/login", {
       username: username,
       password: password,
     })
@@ -19,82 +26,80 @@ export default function Login() {
           localStorage.setItem("username", username);
           localStorage.setItem("isLoggedIn", true);
           localStorage.setItem("userID", response.data.userID);
-
-
         } else {
+          alert("sorry you have entered an incorrect username or Password")
           localStorage.setItem("username", "");
           localStorage.setItem("isLoggedIn", false);
-
         }
       })
       .then(() => {
-        window.location.replace("http://localhost:3000");      });
-  };
-
-  const logout = () => {
-    Axios.post("http://rmcmillan.co.uk/logout", {})
-      .then((response) => {
-        console.log(response.data);
-        localStorage.setItem("username", "");
-        localStorage.setItem("isLoggedIn", false);
-      })
-      .then(() => {
-        window.location.reload(false);
+        navigate("/");
       });
   };
 
-  if (localStorage.getItem("isLoggedIn")==="true") {
+  const logout = () => {
+    Axios.post("https://rmcmillan.co.uk/api/logout", {})
+      .then((response) => {
+        localStorage.setItem("username", "");
+        localStorage.setItem("isLoggedIn", false);
+        localStorage.setItem("userID", "");
+
+      })
+      .then(() => {
+        navigate("/");
+      });
+  };
+
+  if (localStorage.getItem("isLoggedIn") === "true") {
     return (
-      <div>
+      <div style={{overflow: "hidden"}}>
+        <Navbar />
         <Tabs>
           <TabList>
-            <Tab>Your Details</Tab>
-            <Tab>Watch List</Tab>
-            <Tab>Reviewed Movies</Tab>
+            <Tab style={{overflow: "hidden"}}>Watch List</Tab>
+            <Tab style={{overflow: "hidden"}}>Reviewed Movies</Tab>
           </TabList>
           <TabPanel>
-            <h2>Your Account</h2>
-            <h3>22{localStorage.username}22</h3>
-            <h3>{localStorage.isLoggedIn}</h3>
-            <h3>{localStorage.userID}</h3>
-          </TabPanel>
-          <TabPanel>
             <h2>Your Watch List</h2>
-            <hr></hr>
-            <WatchList/>
+            <WatchList />
           </TabPanel>
           <TabPanel>
             <h2>Your reviews</h2>
             <UserReviews />
           </TabPanel>
         </Tabs>
-        <button onClick={logout}>Log out</button>
+        <Button onClick={logout}>Log out</Button>
       </div>
     );
   } else {
     return (
-      <div className="login-form">
-        <form onSubmit={login}>
-          <label>Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => {
-              setUsername(e.target.value);
-            }}
-          />
-          <label>Password</label>
+      <>
+        <Navbar />
 
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-          ></input>
-          <input type="submit" value="submit"></input>
-        </form>
-      </div>
+        <div className="login-form">
+          <form onSubmit={login}>
+            <label>Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+              }}
+              className="input"
+            />
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              className="input"
+            ></input>
+            <Button type="submit" value="submit">Log In</Button>
+          </form>
+        </div>
+      </>
     );
   }
 }

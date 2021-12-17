@@ -1,44 +1,38 @@
 import React from "react";
-import { Card, CardContent, Typography } from "@material-ui/core";
+import { Card, CardContent, Typography, Button } from "@material-ui/core";
 import useStyles from "./styles";
 import axios from "axios";
-import UrlImageDownloader from "react-url-image-downloader";
+import { useNavigate } from "react-router-dom";
 
 
 const WatchListItem = ({ item }) => {
   const classes = useStyles();
-  const style = {
-    width: '150px'
-  };
+  let navigate = useNavigate();
+
   const removeWishItem = (movie) => {
-    console.log(movie)
     axios
-      .post("/removeWatchListByID", {
+      .post("https://rmcmillan.co.uk/api/removeWatchListByID", {
         userID: localStorage.getItem("userID"),
         id: movie.MovieID,
       })
       .then((res) => {
-        console.log(res);
-        //window.location.reload(false);
+        navigate("/");
       });
   };
   return (
     <div>
       <div>
         <Card className={classes.root}>
-          <CardContent><div style={{width:'150px'}}>
-            <Typography variant="h5"><UrlImageDownloader
-            imageUrl={"/images/" + item.url
-          }
-          ></UrlImageDownloader>{item.title}</Typography></div>
+          <CardContent ><div style={{width:'250px'}}>
+            <Typography variant="h5"><img src={"https://rmcmillan.co.uk/api/images/"+item.url} width="100%" />{item.title}</Typography></div>
           </CardContent>
-          <button
+          <Button
             onClick={(e) => {
               removeWishItem(item);
             }}
           >
             Remove item
-          </button>
+          </Button>
         </Card>
       </div>
     </div>

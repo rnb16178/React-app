@@ -1,36 +1,56 @@
-import React, {useEffect, useState} from 'react'
-import Axios from 'axios'
-import WatchListItem from './WatchListItem';
+import React, { useEffect, useState } from "react";
+import Axios from "axios";
+import WatchListItem from "./WatchListItem";
 import Grid from "@material-ui/core/Grid";
 
 export default function WatchList() {
   const [items, setItems] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [counter, setCounter]= useState(0);
 
-    useEffect(() => {
-        Axios.post("http://rmcmillan.co.uk/getWatchList", {
-          userID: 1,
+  useEffect(() => {
 
-        }).then((response) => {
-          console.log(response.data.data);
-          setItems(response.data.data)
-        });
-      },[]);
-      if( items.length>0){
-    return (
-      
-        <div>
-            <Grid container justifyContent="center" spacing={4}>
-    {items &&
-      items.map((item) => (
-        <Grid key={item.id} item xs={12} sm={12} md={12} lg={12}>
-          <WatchListItem item={item} />
-        </Grid>
-      ))}
-      </Grid>
+    getData();
+  }, []);
+  
+  async function getData() {
+    Axios.post("https://rmcmillan.co.uk/api/getWatchList", {
+      userID: localStorage.userID,
+    }).then((response) => {
+      setItems(response.data.data);
+    }).finally(()=>{
+      setLoading(false);
+    })
+  }
+
+
+
+  if (loading) {
+    return "loading...";
+  } else {
+    if (items.length > 0) {
+      return (
+        <div style={{overflow: "hidden"}}>
+          <Grid container justifyContent="center" spacing={4}>
+            {items &&
+              items.map((item, index) => (
+                
+                <Grid key={index} item xs={12} sm={6} md={4} lg={3}>
+                  <WatchListItem item={item} />
+                </Grid>
+
+                
+
+              ))}
+          </Grid>
         </div>
-    )}else{
-      return(<div>
-        <h3>You currently do not have anything in your watch list</h3>
-      </div>);
+      );
+    } else {
+      return (
+        <div>
+          <h3>You currently do not have anything in your watch list</h3>
+        </div>
+      );
     }
+  }
 }

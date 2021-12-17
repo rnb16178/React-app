@@ -5,29 +5,38 @@ import Review from "./review";
 
 export default function UserReviews() {
   const [reviews, setReviews] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Axios.post("http://rmcmillan.co.uk/getReviews", {
-      userID: 1,
+    getData();
+  }, []);
 
+  async function getData() {
+    Axios.post("https://rmcmillan.co.uk/api/getReviews", {
+      userID: localStorage.userID,
     }).then((response) => {
-      console.log(response.data.data);
-      setReviews(response.data.data)
-    });
-  },[]);
-  
-  return <div>
-    
-    <h1>{reviews && reviews.data}</h1>
-    <p>{reviews && reviews.data}</p>
-    <Grid container justifyContent="center" spacing={4}>
-    {reviews &&
-      reviews.map((review) => (
-        <Grid key={review.id} item xs={12} sm={12} md={12} lg={12}>
-          <Review review={review} />
+      setReviews(response.data.data);
+    }).finally(()=>{
+      setLoading(false);
+    })
+  }
+
+  if (loading) {
+    return "loading...";
+  } else {
+    return (
+      <div style={{overflow: "hidden"}}>
+        <h1>{reviews && reviews.data}</h1>
+        <p>{reviews && reviews.data}</p>
+        <Grid overflow="hidden" container justifyContent="center" spacing={4}>
+          {reviews &&
+            reviews.map((review) => (
+              <Grid key={review.id} item xs={12} sm={6} md={4} lg={3}>
+                <Review review={review} />
+              </Grid>
+            ))}
         </Grid>
-      ))}
-      </Grid>
- 
-  </div>;
+      </div>
+    );
+  }
 }
